@@ -1,0 +1,50 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@routes/*": [
+        "./src/routes/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ],
+      "@interfaces/*": [
+        "./src/interfaces/*"
+      ],
+      "@socket/*": [
+        "./src/socket/*"
+      ],
+      "@config/*": [
+        "./src/config/*"
+      ],
+      "@middleware/*": [
+        "./src/middleware/*"
+      ],
+      "@strategy/*": [
+        "./src/strategy/*"
+      ],
+      "@guard/*": [
+        "./src/guard/*"
+      ],
+      "@service/*": [
+        "./src/service/*"
+      ]
+    },
+    "incremental": true,
+    "skipLibCheck": true,
+    "strictNullChecks": false,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false
+  }
+}
