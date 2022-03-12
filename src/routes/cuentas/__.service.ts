@@ -17,7 +17,7 @@ export class AccountService {
     }
 
     async onDetails() {
-        return JSON.parse(JSON.stringify(await this._schema.find().populate('refDetails').sort({ _id: -1 })));
+        return JSON.parse(JSON.stringify(await this._schema.find().populate('refDetails').sort({ _id: 1 })));
     }
     async addAcounts(data: any) {
         return await this._schema.create(data)

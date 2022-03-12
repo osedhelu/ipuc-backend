@@ -18,6 +18,13 @@ export class AccountingService {
         if (validateChainToken(chainToken, { debito, credito, prevBalance, cuenta, wallet })) return prevBalance + debito - credito;
         return 0;
     }
+    async calculateBalanceGeneral(_cu: string): Promise<number> {
+        const data = await this._balance.findOne({ completed: 1 }).sort({ _id: -1 });
+        if (!data) return 0;
+        const { debito, credito, prevBalance, cuenta, wallet, chainToken, prevBalanceGeneral } = data;
+        if (validateChainToken(chainToken, { debito, credito, prevBalance, cuenta, wallet })) return prevBalanceGeneral + debito - credito;
+        return 0;
+    }
 
     /**
      * @addBalance nos permira agregar saldo a un usuario
@@ -39,8 +46,8 @@ export class AccountingService {
         status: enumStatus;
         wallet: any;
         fecha: Date;
+        origin: string
         btcRef?: string;
-        origin?: string
     }): Promise<balance> {
         const detail = await this._balanceDetail.create({
             amount,
@@ -50,6 +57,8 @@ export class AccountingService {
             status,
         });
         const prevBalance = await this.calculateBalance(id, wallet);
+        const prevBalanceGeneral = await this.calculateBalanceGeneral(id);
+
         const data = {
             debito: amount,
             credito: 0,
@@ -61,10 +70,11 @@ export class AccountingService {
             ...data,
             chainToken: generatechainToken(data),
             detail: detail._id,
-            btcRef,
+            btcRef: `RC#${btcRef}`,
             completed: 1,
             origin,
-            fecha
+            fecha,
+            prevBalanceGeneral
         }))
     }
 
@@ -82,15 +92,17 @@ export class AccountingService {
             fromWallet,
             toWallet,
             origin,
-            ref
+            ref,
+            fecha
         }: {
             from: string,
-            to: string,
+            to: any,
             amount: number,
-            fromWallet: walletType,
-            toWallet: walletType,
+            fromWallet: any,
+            toWallet: any,
             ref: string,
             origin: string,
+            fecha: Date
         }
 
     ): Promise<balance> {
@@ -103,6 +115,10 @@ export class AccountingService {
         });
         // descontar el dinero
         const prevBalanceFrom = await this.calculateBalance(from, fromWallet)
+        const prevBalanceGeneralFrom = await this.calculateBalanceGeneral(from)
+        console.log('xxxxxxxxxxxxxx', prevBalanceFrom)
+        console.log('1111111111:', from)
+        console.log('2222222222:', fromWallet)
         const balanceFrom = {
             debito: 0,
             credito: amount,
@@ -116,25 +132,32 @@ export class AccountingService {
             detail: detail._id,
             completed: 1,
             origin,
-            btcRef: ref
+            btcRef: `CE#${ref}`,
+            prevBalanceGeneral: prevBalanceGeneralFrom,
+            fecha
         });
-        // agregar dinero al usuario
-        const prevBalanceTo = await this.calculateBalance(to, toWallet);
-        const balanceTo = {
-            debito: amount,
-            credito: 0,
-            prevBalance: prevBalanceTo,
-            cuenta: to,
-            wallet: toWallet,
-        };
-        return (await this._balance.create({
-            ...balanceTo,
-            chainToken: generatechainToken(balanceTo),
-            completed: 1,
-            detail: detail._id,
-            origin,
-            btcRef: ref
-        }));
+
+        console.log()
+        if (to !== 'SALIDA') {
+            const prevBalanceTo = await this.calculateBalance(to, toWallet);
+            const balanceTo = {
+                debito: amount,
+                credito: 0,
+                prevBalance: prevBalanceTo,
+                cuenta: to,
+                wallet: toWallet,
+            };
+            return (await this._balance.create({
+                ...balanceTo,
+                chainToken: generatechainToken(balanceTo),
+                completed: 1,
+                detail: detail._id,
+                origin,
+                btcRef: `RC#${ref}`,
+                prevBalanceGeneral: prevBalanceGeneralFrom - amount,
+                fecha
+            }));
+        }
 
     }
 

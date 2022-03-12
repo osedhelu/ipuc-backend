@@ -75,6 +75,12 @@ export class balance {
     required: false,
   })
   origin: string
+  @Prop({
+    type: Number,
+    required: false,
+    default: 0
+  })
+  prevBalanceGeneral: number
   _id?: string
 
 }

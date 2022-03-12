@@ -5,9 +5,9 @@ import { Body, Controller, Delete, Get, HttpException, Logger, Param, Post, Put,
 import { ApiBearerAuth, ApiProperty, ApiTags } from '@nestjs/swagger';
 import { AccountingService } from './accounting.service';
 class dtInfoBalance {
-    @ApiProperty({ default: null, required: false })
+    @ApiProperty({ default: "", required: false })
     wallet: walletType;
-    @ApiProperty({ default: null, required: false })
+    @ApiProperty({ default: "", required: false })
     cuenta: string
 }
 let logger = new Logger('accounting')
@@ -22,17 +22,30 @@ class iAccountant {
     wallet: walletType
     @ApiProperty({ default: '' })
     fecha: Date
+    @ApiProperty({ default: '' })
+    origin: string
+
 }
 class iTransacion {
     @ApiProperty({ default: '' })
     from: string;
+    @ApiProperty({ default: '' })
+    to: string;
     @ApiProperty({ default: 300 })
     amount: number;
     @ApiProperty({ default: walletType.DISPONIBLE })
     toWallet: walletType;
     @ApiProperty({ default: walletType.DISPONIBLE })
     fromWallet: walletType
+    @ApiProperty({ default: walletType.DISPONIBLE })
+    origin: walletType
+    @ApiProperty({ default: walletType.DISPONIBLE })
+    code: walletType
+    @ApiProperty({ default: new Date() })
+    fecha: Date
+
 }
+
 
 
 @ApiBearerAuth()
@@ -64,7 +77,8 @@ export class __Controller {
                 status: enumStatus.complete,
                 wallet: data.wallet,
                 btcRef: data.btcRef,
-                fecha: data.fecha
+                fecha: data.fecha,
+                origin: data.origin
             })
             return {
                 ok: true,
@@ -85,11 +99,12 @@ export class __Controller {
             const info = this._service.createTransaction({
                 amount: data.amount,
                 from: data.from,
-                to: req.user._id,
+                to: data.to,
                 fromWallet: data.fromWallet,
                 toWallet: data.toWallet,
-                origin: '',
-                ref: ''
+                origin: data.origin,
+                ref: data.code,
+                fecha: data.fecha
             })
 
             return {
@@ -113,7 +128,7 @@ export class __Controller {
     //     }
 
     // }
-    @UseGuards(JwtAuthGuard)
+    // @UseGuards(JwtAuthGuard)
     @Post('/infoBalance')
     async GetInfoBalance(@Request() req: any, @Body() body: dtInfoBalance) {
         try {
